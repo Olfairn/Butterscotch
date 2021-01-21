@@ -54,39 +54,39 @@ checkout = monday[monday['location'] == 'checkout']
 q3 = checkout.groupby(['hour','location'])[['timestamp']].count()
 sns.lineplot(x='hour',y='timestamp', data=q3, hue='location')
 #%%
-monday['last_loc']= monday[monday['timestamp'] == monday.groupby(['customer_no'])['timestamp'].transform(max)]
-#%%
-last_location = monday[monday['timestamp'] == monday.groupby(['customer_no'])['timestamp'].transform(max)]
+#? Q4: Calculate the time each customer spent in the market
 
-
-location_bug = last_location[last_location['location']!='checkout']
-location_bug.drop('location', axis=1)
-location_bug['location'] = 'checkout'
-location_bug
+time_left = monday.groupby('customer_no')['timestamp'].max()#.apply(lambda x: x[x == 'checkout'])
+time_entered = monday.groupby('customer_no')['timestamp'].min()
+time_spent = time_left - time_entered
+time_spent_min = time_spent / np.timedelta64(1, 'm')
+time_spent.hist()
 
 #%%
-monday.groupby(['customer_no'])['timestamp'].transform(range(10))
+#? Q5: Calculate the total number of customers in the supermarket over time.
 
+#%%
+#? Q6: Plot location by visit step
+
+def count_up(x):
+    return list(range(len(x))) 
+
+monday['step'] = monday.groupby('customer_no')['timestamp'].transform(count_up)
+step_0 = monday[monday['step']==0]
+q6 = step_0.groupby(['hour','location'])[['timestamp']].count()
+sns.lineplot(x='hour',y='timestamp', data=q6, hue='location')
+step_6 = monday[monday['step']<7]
+step_6 = step_6[step_6['location'] != 'checkout']
+q6_1 = step_6.groupby(['hour','location','step'])[['timestamp']].count()
+q6_1 = q6_1.reset_index()
+q6_1.set_index('hour',inplace=True)
+#g = sns.FacetGrid(q6_1,col='step')
+#g.map(sns.histplot, x='location')
+#g.map(sns.barplot,x='hour',y='timestamp',hue='location', kind='line')
+sns.relplot(data=q6_1,x='hour',y='timestamp',col='step',hue='location',kind='line')
+
+#estimator=lambda x: len(x) / len(q6_1) * 100
 
 #%%
 
-#%%
-monday_up = monday.merge(location_bug, on['timestamp','customer_no'])
-#%%
-location_bug
-#%%
-df7 = monday.groupby(['customer_no'])['timestamp'].max()
-
-df7
-#%%
-monday
-
-#Testing Testing Yes I saw! Try to run something
-#%%
-#? Q4. Calculate the time each customer spent in the market
-time_spent = monday.groupby('customer_no')[['timestamp']].agg(np.ptp)
-
-time = pd.to_timedelta(time_spent.timestamp).dt.total_seconds() / 60
-#(time_spent.timestamp - pd.to_datetime('1970-01-01')).dt.total_seconds()
-
-time.hist()
+#monday['last_loc']= monday[monday['timestamp'] == monday.groupby(['customer_no'])['timestamp'].transform(max)]
