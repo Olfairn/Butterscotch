@@ -59,11 +59,14 @@ sns.lineplot(x='hour',y='timestamp', data=q3, hue='location')
 time_left = monday.groupby('customer_no')['timestamp'].max()#.apply(lambda x: x[x == 'checkout'])
 time_entered = monday.groupby('customer_no')['timestamp'].min()
 time_spent = time_left - time_entered
-time_spent_min = time_spent / np.timedelta64(1, 'm')
-time_spent.hist()
+time_spent_minutes = time_spent / np.timedelta64(1, 'm')
+time_spent_minutes.hist()
 
 #%%
 #? Q5: Calculate the total number of customers in the supermarket over time.
+#*Complex way: I take the 1st entry and generate a new timestamp of 1 minute based on how long the person stays
+
+#times = [(datetime.datetime(2017, 7, 17, 9, 10, 0) + datetime.timedelta(minutes=5*x)).time() for x in range(5)]
 
 #%%
 #? Q6: Plot location by visit step
