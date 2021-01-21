@@ -21,7 +21,10 @@ friday = pd.read_csv('data/friday.csv', sep=';')
 #%%
 monday['timestamp'] = to_datetime(monday['timestamp'],format='%Y-%m-%d %H:%M:%S')
 #%%
-monday[monday['customer_no']==1]
+# Creating checkout for last consumers 
+monday['checkout'] = monday.duplicated(subset = 'customer_no', keep = 'last')
+monday.loc[monday['checkout'] == False, 'location'] = 'checkout'
+monday.drop('checkout', axis=1, inplace=True)
 
 #%%
 #Show the distribution of locations per user
@@ -39,29 +42,18 @@ q1.plot(kind='bar')
 #? Q2 : Calculate the total number of customers in each section over time
 
 monday['hour'] = monday['timestamp'].dt.hour
-q2 = monday.groupby(['hour','location'])[['timestamp']].count()
+no_checkout = monday[monday['location'] != 'checkout']
+q2 = no_checkout.groupby(['hour','location'])[['timestamp']].count()
 sns.lineplot(x='hour',y='timestamp', data=q2, hue='location')
 
 #%%
 
 #? Q3: Display the number of customers at checkout over time
-#! Creating checkout for last consumers 
-monday['checkout'] = monday.duplicated(subset = 'customer_no', keep = 'last')
-#If checkout == False => 'checkout'
-#if monday['checkout'] == False:
- #   df['location'].replace('dairy','checkout')
-monday.loc[monday['checkout'] == False, 'location'] = 'checkout'
 
-monday
+checkout = monday[monday['location'] == 'checkout']
+q3 = checkout.groupby(['hour','location'])[['timestamp']].count()
+sns.lineplot(x='hour',y='timestamp', data=q3, hue='location')
 #%%
-#Show last entry per consumer
-# How can I get the location in here ?! 
-monday.sort_values('customer_no')
-for i in range(20):
-    monday['count_step'] = 
-
-#%%
-
 monday['last_loc']= monday[monday['timestamp'] == monday.groupby(['customer_no'])['timestamp'].transform(max)]
 #%%
 last_location = monday[monday['timestamp'] == monday.groupby(['customer_no'])['timestamp'].transform(max)]
